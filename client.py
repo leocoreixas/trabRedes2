@@ -27,7 +27,7 @@ class Client:
         # endereço IPV4 e protocolo TCP orientado à conexão
         udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         dest = (HOST, PORT)
-
+        list_frame = []
         udp.sendto(("REPRODUZIR_VIDEO;"+self.name+";"+path).encode(), dest)
         msg, _ = udp.recvfrom(self.BUFF_SIZE)
 
@@ -68,7 +68,6 @@ class Client:
             )
             output_audio = wav_file.readframes(5 * wav_file.getframerate())
             stream_out.write(output_audio)
-
             while True:
                 try:
                     packet, _ = udp.recvfrom(self.BUFF_SIZE)
@@ -86,10 +85,18 @@ class Client:
                         cv2.imshow("Filme", frame)
 
                         key = cv2.waitKey(1) & 0xFF
+
+                        if cv2.waitKey(1) & 0xFF == ord('q'):
+                            break
+                        if key == ord('p'):
+                            cv2.waitKey(-1)  # wait until any key is pressed
                         if key == ord('q'):
                             # client_socket.close()
                             cv2.destroyAllWindows()
                             break
+                        list_frame.append(frame)
+                        if frame.empty() or key == ord('f'):
+                            return
                         if cnt == frames_to_count:
                             try:
                                 fps = round(frames_to_count / (time.time() - st))
@@ -97,6 +104,7 @@ class Client:
                                 cnt = 0
                             except:
                                 pass
+
                         cnt += 1
                 except Exception as e:
                     print("Error: " + str(e))

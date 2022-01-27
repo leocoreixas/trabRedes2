@@ -7,7 +7,8 @@ import cv2
 import pickle
 import struct
 import imutils
-
+import tkinter as tk
+from tkinter import messagebox
 class ServiceServer :
 
     def __init__(self):
@@ -33,6 +34,10 @@ class ServiceServer :
             """
             Main loop do servidor. Fica aguardando novas conexões
             """
+            tkWindow1 = tk.Tk()
+            tkWindow1.geometry('200x250')
+            tkWindow1.title('Informações do Usuário')
+            text = tk.Text(tkWindow1)
             while True:
                 con, client = self.tcp.accept()
                 msg = con.recv(1024).decode()
@@ -41,12 +46,12 @@ class ServiceServer :
                     id = msg.split(";")[1]
                     for client in self.clients:
                         if(client[2] in id):
-                            print("Ächei o cliente!")
+                            text.insert(tk.INSERT, "nome:" + client[2] + "tipo do perfil:" + client[3])
+                            print("nome:" + client[2] + "tipo do perfil:" + client[3])
                             con.send(("USER_INFORMATION;"+client[3]).encode())
                 else:
                     msg = msg.split(";")
                     self.clients.append((con, client, msg[0], msg[1]))
-
         except KeyboardInterrupt as e:
             print("Servidor finalizado pelo teclado")
         except Exception as e:
